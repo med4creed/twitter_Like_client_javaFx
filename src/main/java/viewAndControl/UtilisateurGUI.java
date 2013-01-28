@@ -1,12 +1,7 @@
 package viewAndControl;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -25,19 +20,13 @@ import javafx.scene.layout.StackPane;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import model.Utilisateur;
 import taskAndService.TaskAndServiceUtilisateur;
 
-import med4creed.TwitterApp;
-import model.Utilisateur;
-
-import clientJersey.ClientJersey;
-
-import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class UtilisateurGUI extends Parent {
 	TaskAndServiceUtilisateur taskServUser;
-	AuthentificationGUI authenGUI;
 
 	Label lblNom = new Label("Nom:");
 	Label lblPnom = new Label("Prénom:");

@@ -2,8 +2,6 @@ package viewAndControl;
 
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,13 +14,9 @@ import javafx.scene.layout.GridPane;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import model.Message;
 import taskAndService.TaskAndServiceMessage;
 
-import model.Message;
-
-import clientJersey.ClientJersey;
-
-import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class MessageGUI extends Parent {

@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -28,16 +27,12 @@ import javafx.scene.layout.VBox;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import taskAndService.TaskAndServiceGroupe;
-import taskAndService.TaskAndServiceMessage;
-
 import model.Groupe;
 import model.Message;
 import model.Utilisateur;
+import taskAndService.TaskAndServiceGroupe;
+import taskAndService.TaskAndServiceMessage;
 
-import clientJersey.ClientJersey;
-
-import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class GroupeGUI extends Parent {
