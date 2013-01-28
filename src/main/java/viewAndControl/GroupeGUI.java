@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
@@ -51,7 +52,9 @@ public class GroupeGUI extends Parent {
 	Button btnCreerGrpe = new Button("Créer");
 	Button btnAnnulCreaGrpe = new Button("Annuler");
 	Label lblNomGrpe = new Label("Nom du groupe:");
+	Label lbldescription = new Label("Déscription:");
 	TextField txtfNomGrpe = new TextField();
+	TextArea txtfdescription = new TextArea();
 	GridPane gridpCreationGrpe = new GridPane();
 
 	public GridPane creerGroupe(final long idUtil) {
@@ -72,14 +75,17 @@ public class GroupeGUI extends Parent {
 		lblNomGrpe.setMinWidth(100);
 
 		txtfNomGrpe.setPrefColumnCount(Integer.MAX_VALUE);
-
+		txtfdescription.setPrefHeight(50);
+		txtfdescription.setWrapText(true);
 		btnCreerGrpe.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				if ((txtfNomGrpe.getText() != null && !txtfNomGrpe.getText()
 						.isEmpty())) {
 					MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 					String nomGrpe = txtfNomGrpe.getText();
+					String description = txtfdescription.getText();
 					params.add("nomGroupe", nomGrpe);
+					params.add("description", description);
 					txtfNomGrpe.clear();
 					taskServGrp.taskCreerGrpe(idUtil, params);
 				} else {
@@ -91,13 +97,16 @@ public class GroupeGUI extends Parent {
 		btnAnnulCreaGrpe.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				txtfNomGrpe.clear();
+				txtfdescription.clear();
 			}
 		});
 		gridpCreationGrpe.getChildren().clear();
 		gridpCreationGrpe.add(lblNomGrpe, 0, 0);
 		gridpCreationGrpe.add(txtfNomGrpe, 1, 0);
-		gridpCreationGrpe.add(btnAnnulCreaGrpe, 0, 1);
-		gridpCreationGrpe.add(btnCreerGrpe, 1, 1);
+		gridpCreationGrpe.add(lbldescription, 0, 1);
+		gridpCreationGrpe.add(txtfdescription, 1, 1);
+		gridpCreationGrpe.add(btnAnnulCreaGrpe, 0, 2);
+		gridpCreationGrpe.add(btnCreerGrpe, 1, 2);
 
 		return gridpCreationGrpe;
 	}

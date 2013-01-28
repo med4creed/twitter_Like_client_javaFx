@@ -37,6 +37,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -90,7 +91,7 @@ public class TwitterApp extends Application {
 	private void init(Stage primaryStage) {
 		primaryStage.setTitle("Welcome on twitter like!");
 		root = new StackPane();
-		scene = new Scene(root, 600, 600, Color.ROSYBROWN);
+		scene = new Scene(root, 800, 600, Color.ALICEBLUE);
 		primaryStage.setScene(scene);
 
 		bpLogin = new BorderPane();
@@ -100,9 +101,11 @@ public class TwitterApp extends Application {
 		vbTop = new VBox();
 		vbTop.getChildren().addAll(menuPrincipal(), toolBarPrincipal());
 		bpCentre = new BorderPane();
+		
 		bpAccueil = new BorderPane();
 		bpAccueil.setTop(vbTop);
 		bpAccueil.setCenter(bpCentre);
+		BorderPane.setAlignment(bpCentre, Pos.CENTER);
 		bpAccueil.setLeft(navBarPrincipale());
 
 		taskServGrp = new TaskAndServiceGroupe(rootUri);
@@ -165,6 +168,7 @@ public class TwitterApp extends Application {
 						&& !txtfEmailLogin.getText().isEmpty()
 						&& MdpLogin.getText() != null
 						&& !MdpLogin.getText().isEmpty()) {
+					bpCentre.getChildren().clear();
 					MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 					params.add("mail", txtfEmailLogin.getText());
 					params.add("mdp", MdpLogin.getText());
@@ -186,9 +190,8 @@ public class TwitterApp extends Application {
 								System.out.println(response.toString());
 								System.out.println("vous etes connecté!...Mr "
 										+ user.getPseudo());
-								root.getChildren().clear();
-								root.getChildren().add(bpAccueil);
 							} else {
+								bpLogin.setBottom(new Label("Erreur de connexion! mauvais identifiants..."));
 								System.out.println(response.toString());
 							}
 						}
@@ -214,9 +217,14 @@ public class TwitterApp extends Application {
 
 	public void logout() {
 		System.out.println("vous etes déconnecté!");
+		// user = null;
+		bpLogin.getChildren().clear();
+		bpLogin = new BorderPane();
+		bpLogin.setTop(login());
+		bpLogin.setCenter(creerUnCompte());
 		root.getChildren().clear();
 		root.getChildren().add(bpLogin);
-		user = null;
+
 	}
 
 	// Inscription
@@ -270,7 +278,7 @@ public class TwitterApp extends Application {
 				params.add("pseudo", txtfPseudo.getText());
 				params.add("mail", txtfMail1.getText());
 				params.add("mdp", Mdp1.getText());
-				Task<ClientResponse> task = taskServUser.taskCreerCpte(params);
+				final Task<ClientResponse> task = taskServUser.taskCreerCpte(params);
 				ProgressIndicator pi = new ProgressIndicator();
 				pi.setMaxSize(100, 100);
 				pi.progressProperty().bind(task.progressProperty());
@@ -279,14 +287,24 @@ public class TwitterApp extends Application {
 					public void handle(WorkerStateEvent success) {
 						ClientResponse response = (ClientResponse) success
 								.getSource().getValue();
-						user = utilisateurFromJson(response
-								.getEntity(String.class));
-						msgGUI = new MessageGUI();
-						userGUI = new UtilisateurGUI();
-						grpGUI = new GroupeGUI();
-						root.getChildren().clear();
-						root.getChildren().add(bpAccueil);
-						System.out.println(response.toString());
+						if (response.getStatus() == 200) {
+							user = utilisateurFromJson(response
+									.getEntity(String.class));
+							msgGUI = new MessageGUI();
+							userGUI = new UtilisateurGUI();
+							grpGUI = new GroupeGUI();
+							root.getChildren().clear();
+							root.getChildren().add(bpAccueil);
+							System.out.println(response.toString());
+							bpLogin.getChildren().clear();
+							bpLogin = new BorderPane();
+							bpLogin.setTop(login());
+							bpLogin.setCenter(creerUnCompte());
+						} else {							
+							System.out.println(response.toString());
+							logout();
+							bpLogin.setBottom(new Label("Erreur de connexion! adresse mail déjà utilisée..."));
+						}
 					}
 				});
 			}
@@ -303,6 +321,8 @@ public class TwitterApp extends Application {
 				Mdp2.clear();
 			}
 		});
+
+		gridpCreationCpte.getChildren().clear();
 
 		gridpCreationCpte.add(lblNom, 0, 0);
 		gridpCreationCpte.add(txtfNom, 1, 0);
@@ -359,9 +379,9 @@ public class TwitterApp extends Application {
 	public HBox toolBarPrincipal() {
 		btnAccueil.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				final javafx.concurrent.Service<ObservableList<Message>> service = taskAndServMsg
-						.serviceGetAllMsgs();
 				bpCentre.getChildren().clear();
+				final javafx.concurrent.Service<ObservableList<Message>> service = taskAndServMsg
+						.serviceGetAllMsgs();				
 				ProgressIndicator pi = new ProgressIndicator();
 				pi.setMaxSize(60, 60);
 				pi.progressProperty().bind(service.progressProperty());
@@ -370,7 +390,7 @@ public class TwitterApp extends Application {
 					public void handle(WorkerStateEvent success) {
 						final ObservableList<Message> listMsgs = (ObservableList<Message>) success
 								.getSource().getValue();
-
+						bpCentre.getChildren().clear();
 						Platform.runLater(new Runnable() {
 							public void run() {
 								VBox vb = new VBox();
@@ -385,8 +405,12 @@ public class TwitterApp extends Application {
 								sp.setContent(vb);
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
-								bpCentre.getChildren().clear();
+								Label lab = new Label("Les dernières actualités...");
+								lab.setFont(new Font(20));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER);
 								bpCentre.setCenter(sp);
+								BorderPane.setAlignment(sp, Pos.CENTER);
 							}
 						});
 					}
@@ -397,22 +421,24 @@ public class TwitterApp extends Application {
 
 		btnMonEspace.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
+				bpCentre.getChildren().clear();
 				Platform.runLater(new Runnable() {
 					public void run() {
 						bpCentre.getChildren().clear();
 						bpCentre.setTop(userGUI.infoUtilisateur(user));
 						bpCentre.setCenter(userGUI.modifierMdp(user));
-						bpCentre.setBottom(userGUI.supprimerCpte(user.getId()));
+						bpCentre.setBottom(userGUI.supprimerCpte(user.getId(),root,bpLogin));
 					}
 				});
 			}
 		});
 		btnDeconnex.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
+				bpCentre.getChildren().clear();
 				logout();
 			}
 		});
-
+		
 		hboxToolBar.getChildren().clear();
 		hboxToolBar.setPadding(new Insets(0, 0, 0, 0));
 		hboxToolBar.setSpacing(5);
@@ -445,10 +471,15 @@ public class TwitterApp extends Application {
 
 		bt1.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-
+			
 				Platform.runLater(new Runnable() {
 					public void run() {
 						bpCentre.getChildren().clear();
+						Label lab = new Label("Paramètres généraux du compte");
+						lab.setFont(new Font(30));
+						bpCentre.setTop(lab);
+						BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+						bpCentre.setTop(lab);
 						bpCentre.setCenter(userGUI.infoUtilisateur(user));
 					}
 				});
@@ -458,13 +489,23 @@ public class TwitterApp extends Application {
 		bt2.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				bpCentre.getChildren().clear();
+				Label lab = new Label("Paramètres de sécurité");
+				lab.setFont(new Font(30));
+				bpCentre.setTop(lab);
+				BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+				bpCentre.setTop(lab);
 				bpCentre.setCenter(userGUI.modifierMdp(user));
 			}
 		});
 		bt3.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				bpCentre.getChildren().clear();
-				bpCentre.setCenter(userGUI.supprimerCpte(user.getId()));
+				Label lab = new Label("Quitter Twitter Like... ;-(");
+				lab.setFont(new Font(30));
+				bpCentre.setTop(lab);
+				BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+				bpCentre.setTop(lab);
+				bpCentre.setCenter(userGUI.supprimerCpte(user.getId(), root, bpLogin));
 			}
 		});
 		vbt1.getChildren().addAll(bt1, bt2, bt3);
@@ -479,6 +520,11 @@ public class TwitterApp extends Application {
 		bt4.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				bpCentre.getChildren().clear();
+				Label lab = new Label("Cmment ça va, "+user.getPseudo()+"?");
+				lab.setFont(new Font(30));
+				bpCentre.setTop(lab);
+				BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+				bpCentre.setTop(lab);
 				bpCentre.setCenter(msgGUI.posterMessage(user.getId(), 0, false));
 			}
 		});
@@ -516,6 +562,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Vos actualités Mr "+user.getPseudo()+"...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -557,6 +608,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Toutes les actualités des amis à suivre...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -577,6 +633,11 @@ public class TwitterApp extends Application {
 		bt6.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				bpCentre.getChildren().clear();
+				Label lab = new Label("Crée ton groupe...");
+				lab.setFont(new Font(30));
+				bpCentre.setTop(lab);
+				BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+				bpCentre.setTop(lab);
 				bpCentre.setCenter(grpGUI.creerGroupe(user.getId()));
 			}
 		});
@@ -613,6 +674,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Gérer mes groupes...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -663,6 +729,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Rejoindre un nouveau groupe...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -709,6 +780,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Les amis à suivre...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -748,6 +824,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Abonnements groupes...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});
@@ -803,6 +884,11 @@ public class TwitterApp extends Application {
 								sp.setPrefWidth(400);
 								sp.setMaxWidth(500);
 								bpCentre.getChildren().clear();
+								Label lab = new Label("Trouver des amis...");
+								lab.setFont(new Font(30));
+								bpCentre.setTop(lab);
+								BorderPane.setAlignment(lab, Pos.CENTER_LEFT);
+								bpCentre.setTop(lab);
 								bpCentre.setCenter(sp);
 							}
 						});

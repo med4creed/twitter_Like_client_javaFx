@@ -210,15 +210,15 @@ public class ClientJersey {
 		return obsListMsgs;
 	}
 
-	public ObservableList<Message> getAllMessagesOfUsersToFollow(long idUtil) {
-		String str = wr.path("messages/aSuivre/utilisateur/" + idUtil)
+	public ObservableList<Message> getAllMessagesOfUtilisateur(long idUtil) {
+		String str = wr.path("messages/utilisateur/" + idUtil)
 				.accept(MediaType.APPLICATION_JSON).get(String.class);
 		ObservableList<Message> obsListMsgs = listMesageFromJson(str);
 		return obsListMsgs;
 	}
 
-	public ObservableList<Message> getAllMessagesOfUtilisateur(long idUtil) {
-		String str = wr.path("messages/utilisateur/" + idUtil)
+	public ObservableList<Message> getAllMessagesOfUsersToFollow(long idUtil) {
+		String str = wr.path("messages/aSuivre/utilisateur/" + idUtil)
 				.accept(MediaType.APPLICATION_JSON).get(String.class);
 		ObservableList<Message> obsListMsgs = listMesageFromJson(str);
 		return obsListMsgs;

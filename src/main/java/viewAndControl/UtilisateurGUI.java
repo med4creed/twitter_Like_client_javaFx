@@ -108,6 +108,10 @@ public class UtilisateurGUI extends Parent {
 		ColumnConstraints column1 = new ColumnConstraints();
 		column1.setHalignment(HPos.LEFT);
 		gridpInfoUtilisateur.getColumnConstraints().add(column1);
+		
+		ColumnConstraints column2 = new ColumnConstraints();
+		column2.setHalignment(HPos.RIGHT);
+		gridpInfoUtilisateur.getColumnConstraints().add(column2);
 
 		txtfNom.setEditable(false);
 		txtfPnom.setEditable(false);
@@ -120,7 +124,9 @@ public class UtilisateurGUI extends Parent {
 
 		btnAnnulModifCpte.setVisible(false);
 		btnEnvoyerModifCpte.setVisible(false);
-
+		final AnchorPane ap = new AnchorPane();
+		ap.setVisible(false);
+		
 		btnModifCpte.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
 				txtfNom.setEditable(true);
@@ -128,7 +134,9 @@ public class UtilisateurGUI extends Parent {
 				txtfPseudo.setEditable(true);
 				txtfMail.setEditable(true);
 
+				
 				btnModifCpte.setVisible(false);
+				ap.setVisible(true);
 				btnEnvoyerModifCpte.setVisible(true);
 				btnAnnulModifCpte.setVisible(true);
 			}
@@ -141,12 +149,12 @@ public class UtilisateurGUI extends Parent {
 				params.add("pseudo", txtfPseudo.getText());
 				params.add("mail", txtfMail.getText());
 				taskServUser.taskModifierCompte(user.getId(), params);
-
 				txtfNom.setEditable(false);
 				txtfPnom.setEditable(false);
 				txtfPseudo.setEditable(false);
 				txtfMail.setEditable(false);
-
+				
+				ap.setVisible(false);
 				btnEnvoyerModifCpte.setVisible(false);
 				btnAnnulModifCpte.setVisible(false);
 				btnModifCpte.setVisible(true);
@@ -159,6 +167,7 @@ public class UtilisateurGUI extends Parent {
 				txtfPseudo.setEditable(false);
 				txtfMail.setEditable(false);
 
+				ap.setVisible(false);
 				btnEnvoyerModifCpte.setVisible(false);
 				btnAnnulModifCpte.setVisible(false);
 				btnModifCpte.setVisible(true);
@@ -166,6 +175,11 @@ public class UtilisateurGUI extends Parent {
 		});
 
 		gridpInfoUtilisateur.getChildren().clear();
+		
+		ap.getChildren().addAll(btnEnvoyerModifCpte,
+				btnAnnulModifCpte);
+		AnchorPane.setLeftAnchor(btnEnvoyerModifCpte, 0.0);
+		AnchorPane.setRightAnchor(btnAnnulModifCpte, 0.0);
 
 		gridpInfoUtilisateur.add(lblNom, 0, 0);
 		gridpInfoUtilisateur.add(txtfNom, 1, 0);
@@ -178,8 +192,7 @@ public class UtilisateurGUI extends Parent {
 		gridpInfoUtilisateur.add(lblMail, 0, 4);
 		gridpInfoUtilisateur.add(txtfMail, 1, 4);
 		gridpInfoUtilisateur.add(btnModifCpte, 1, 5);
-		gridpInfoUtilisateur.add(btnEnvoyerModifCpte, 0, 5);
-		gridpInfoUtilisateur.add(btnAnnulModifCpte, 1, 5);
+		gridpInfoUtilisateur.add(ap, 1, 5);
 
 		return gridpInfoUtilisateur;
 	}
@@ -236,7 +249,8 @@ public class UtilisateurGUI extends Parent {
 	}
 
 	// supprimer son compte
-	public AnchorPane supprimerCpte(final long idUtilisateur) {
+	public AnchorPane supprimerCpte(final long idUtilisateur,
+			final StackPane root, final BorderPane bpLogin) {
 		lblSuppCpte = new Label(
 				"Etes vous sûr de vouloir supprimer votre compte?");
 		btnSuppCpte = new Button("Supprimer mon compte");
@@ -254,6 +268,8 @@ public class UtilisateurGUI extends Parent {
 				btnOui.setOnAction(new EventHandler<ActionEvent>() {
 					public void handle(ActionEvent e) {
 						taskServUser.taskSupprimerCpte(idUtilisateur);
+						root.getChildren().clear();
+						root.getChildren().add(bpLogin);
 					}
 				});
 				btnNon.setOnAction(new EventHandler<ActionEvent>() {
